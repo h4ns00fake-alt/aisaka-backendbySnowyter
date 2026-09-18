@@ -15,7 +15,7 @@ const DB_FILE = path.join(__dirname, "playerdata.json");
 // ---- API KEY don gian de chan nguoi la goi thang vao backend ----
 // Doi gia tri nay thanh 1 chuoi bi mat cua rieng ban, roi dung y het
 // trong PlayerDataModule.lua (bien API_KEY)
-const API_KEY = "doi-chuoi-nay-thanh-bi-mat-cua-ban";
+const API_KEY = "snowyter_aisaka_2026_x7Kp9";
 
 // ---- Doc / ghi file JSON (giong 1 database nho gon) ----
 function loadDB() {
