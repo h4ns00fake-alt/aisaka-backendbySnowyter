@@ -1,0 +1,12 @@
+{
+  "name": "aisaka-backend",
+  "version": "1.0.0",
+  "description": "Backend luu tru du lieu player (Token, PIE, Level, Exp) cho Aisaka Studio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
