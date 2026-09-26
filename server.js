@@ -1,5 +1,5 @@
 // server.js
-// Backend luu tru data player (Token, PIE, Level, Exp) cho Aisaka Studio
+// Backend luu tru data player (Token, PIE, Level, Exp) cho Octane Studio
 // Chay: npm install && npm start
 
 const express = require("express");
@@ -15,7 +15,7 @@ const DB_FILE = path.join(__dirname, "playerdata.json");
 // ---- API KEY don gian de chan nguoi la goi thang vao backend ----
 // Doi gia tri nay thanh 1 chuoi bi mat cua rieng ban, roi dung y het
 // trong PlayerDataModule.lua (bien API_KEY)
-const API_KEY = "snowyter_aisaka_2026_x7Kp9";
+const API_KEY = "snowyter_octane_2026_x7Kp9";
 
 // ---- Doc / ghi file JSON (giong 1 database nho gon) ----
 function loadDB() {
@@ -80,9 +80,9 @@ app.post("/save", checkApiKey, (req, res) => {
 
 // ---- Health check ----
 app.get("/", (req, res) => {
-	res.send("Aisaka backend dang chay OK");
+	res.send("Octane.sw24 backend dang chay OK");
 });
 
 app.listen(PORT, () => {
-	console.log(`Aisaka backend dang chay tai cong ${PORT}`);
+	console.log(`Octane.sw24 backend dang chay tai cong ${PORT}`);
 });
