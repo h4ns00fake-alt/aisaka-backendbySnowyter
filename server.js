@@ -31,9 +31,6 @@ function loadDB() {
 	}
 }
 
-function saveDB(db) {
-	fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf8");
-}
 let writeQueue = Promise.resolve();
 
 function saveDBSafe(db) {
@@ -104,7 +101,7 @@ app.get("/load", checkApiKey, (req, res) => {
 });
 
 // ---- POST /save  body: { userId, data } ----
-app.post("/save", checkApiKey, (req, res) => {
+app.post("/save", checkApiKey, async (req, res) => {
         const { userId, data } = req.body;
 
         if (!userId || !data) {
@@ -120,15 +117,19 @@ app.post("/save", checkApiKey, (req, res) => {
         const db = loadDB();
         const old = db[userId] || { ...DEFAULT_DATA };
 
-        // Chặn tăng bất thường trong 1 lần save (tuỳ chỉnh ngưỡng)
         if (data.Token - old.Token > 100000 || data.Level - old.Level > 5) {
                 console.warn(`Nghi ngo gian lan: userId=${userId}`, old, "->", data);
                 return res.status(400).json({ error: "Thay doi bat thuong, bi tu choi" });
         }
 
         db[userId] = data;
-        saveDB(db);
-        res.json({ success: true });
+        try {
+                await saveDBSafe(db);
+                res.json({ success: true });
+        } catch (e) {
+                console.error("Loi ghi DB:", e);
+                res.status(500).json({ error: "Loi luu du lieu" });
+        }
 });
 
 // ---- Health check ----
