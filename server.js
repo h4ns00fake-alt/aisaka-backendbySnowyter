@@ -34,14 +34,31 @@ function loadDB() {
 function saveDB(db) {
 	fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf8");
 }
+let writeQueue = Promise.resolve();
 
+function saveDBSafe(db) {
+        writeQueue = writeQueue.then(() => {
+                return new Promise((resolve, reject) => {
+                        fs.writeFile(DB_FILE, JSON.stringify(db, null, 2), "utf8", (err) => {
+                                if (err) reject(err);
+                                else resolve();
+                        });
+                });
+        });
+        return writeQueue;
+}
 // ---- Middleware kiem tra API key ----
+const crypto = require("crypto");
+
 function checkApiKey(req, res, next) {
-	const key = req.headers["x-api-key"];
-	if (key !== API_KEY) {
-		return res.status(401).json({ error: "Sai API key" });
-	}
-	next();
+        const key = req.headers["x-api-key"] || "";
+        const expected = Buffer.from(API_KEY);
+        const given = Buffer.from(key);
+
+        if (given.length !== expected.length || !crypto.timingSafeEqual(given, expected)) {
+                return res.status(401).json({ error: "Sai API key" });
+        }
+        next();
 }
 
 const DEFAULT_DATA = {
@@ -51,31 +68,67 @@ const DEFAULT_DATA = {
 	Exp: 0,
 };
 
+function isValidUserId(userId) {
+        // Chỉ cho phép chuỗi số hoặc chuỗi chữ-số, độ dài hợp lý
+        return typeof userId === "string" &&
+               /^[a-zA-Z0-9_-]{1,50}$/.test(userId) &&
+               userId !== "__proto__" &&
+               userId !== "constructor" &&
+               userId !== "prototype";
+}
+
+function isValidPlayerData(data) {
+        if (typeof data !== "object" || data === null) return false;
+        const keys = ["Token", "PIE", "Level", "Exp"];
+        for (const k of keys) {
+                if (typeof data[k] !== "number" || !Number.isFinite(data[k]) || data[k] < 0) {
+                        return false;
+                }
+        }
+        // Giới hạn hợp lý để chặn số điên rồ - chỉnh theo game của bạn
+        if (data.Token > 1_000_000 || data.Level > 1000 || data.Exp > 10_000_000) {
+                return false;
+        }
+        return true;
+}
+
 // ---- GET /load?userId=123 ----
 app.get("/load", checkApiKey, (req, res) => {
-	const userId = req.query.userId;
-	if (!userId) {
-		return res.status(400).json({ error: "Thieu userId" });
-	}
-
-	const db = loadDB();
-	const data = db[userId] || { ...DEFAULT_DATA };
-
-	res.json({ success: true, data });
+        const userId = req.query.userId;
+        if (!userId || !isValidUserId(userId)) {
+                return res.status(400).json({ error: "userId khong hop le" });
+        }
+        const db = loadDB();
+        const data = db[userId] || { ...DEFAULT_DATA };
+        res.json({ success: true, data });
 });
 
 // ---- POST /save  body: { userId, data } ----
 app.post("/save", checkApiKey, (req, res) => {
-	const { userId, data } = req.body;
-	if (!userId || !data) {
-		return res.status(400).json({ error: "Thieu userId hoac data" });
-	}
+        const { userId, data } = req.body;
 
-	const db = loadDB();
-	db[userId] = data;
-	saveDB(db);
+        if (!userId || !data) {
+                return res.status(400).json({ error: "Thieu userId hoac data" });
+        }
+        if (!isValidUserId(userId)) {
+                return res.status(400).json({ error: "userId khong hop le" });
+        }
+        if (!isValidPlayerData(data)) {
+                return res.status(400).json({ error: "Du lieu khong hop le" });
+        }
 
-	res.json({ success: true });
+        const db = loadDB();
+        const old = db[userId] || { ...DEFAULT_DATA };
+
+        // Chặn tăng bất thường trong 1 lần save (tuỳ chỉnh ngưỡng)
+        if (data.Token - old.Token > 100000 || data.Level - old.Level > 5) {
+                console.warn(`Nghi ngo gian lan: userId=${userId}`, old, "->", data);
+                return res.status(400).json({ error: "Thay doi bat thuong, bi tu choi" });
+        }
+
+        db[userId] = data;
+        saveDB(db);
+        res.json({ success: true });
 });
 
 // ---- Health check ----
