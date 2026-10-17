@@ -117,7 +117,7 @@ app.post("/save", checkApiKey, async (req, res) => {
         const db = loadDB();
         const old = db[userId] || { ...DEFAULT_DATA };
 
-        if (data.Token - old.Token > 100000 || data.Level - old.Level > 5) {
+        if (data.Token - old.Token > 100000) {
                 console.warn(`Nghi ngo gian lan: userId=${userId}`, old, "->", data);
                 return res.status(400).json({ error: "Thay doi bat thuong, bi tu choi" });
         }
