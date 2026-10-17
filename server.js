@@ -83,7 +83,7 @@ function isValidPlayerData(data) {
                 }
         }
         // Giới hạn hợp lý để chặn số điên rồ - chỉnh theo game của bạn
-        if (data.Token > 1_000_000 || data.Level > 1000 || data.Exp > 10_000_000) {
+        if (data.Token > 1_000_000_000 || data.Level > 100_000_000 || data.Exp > 1_000_000_000_000) {
                 return false;
         }
         return true;
