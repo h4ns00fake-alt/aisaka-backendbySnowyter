@@ -49,7 +49,13 @@ app.post("/save", checkApiKey, async (req, res) => {
 	if (!isValidUserId(userId)) return res.status(400).json({ error: "userId khong hop le" });
 	if (!isValidPlayerData(data)) return res.status(400).json({ error: "Du lieu khong hop le" });
 	try {
-		await col.updateOne({ _id: userId }, { $set: { data, updatedAt: new Date() } }, { upsert: true });
+		// Chỉ lưu đúng 4 trường hợp lệ, bỏ qua trường lạ (ví dụ Token cũ)
+		const { Point, PIE, Level, Exp } = data;
+		await col.updateOne(
+			{ _id: userId },
+			{ $set: { data: { Point, PIE, Level, Exp }, updatedAt: new Date() } },
+			{ upsert: true }
+		);
 		res.json({ success: true });
 	} catch (e) {
 		console.error(e);
