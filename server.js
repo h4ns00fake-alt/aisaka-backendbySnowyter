@@ -23,10 +23,11 @@ function isValidUserId(userId) {
 
 function isValidPlayerData(data) {
 	if (typeof data !== "object" || data === null) return false;
-	for (const k of ["Token", "PIE", "Level", "Exp"]) {
+	for (const k of ["Point", "PIE", "Level", "Exp"]) {
 		if (typeof data[k] !== "number" || !Number.isFinite(data[k]) || data[k] < 0) return false;
 	}
-	return data.Token <= 1_000_000_000 && data.Level <= 100_000_000 && data.Exp <= 1_000_000_000_000;
+	return data.Point <= 1_000_000_000 && data.PIE <= 1_000_000_000
+		&& data.Level <= 100_000_000 && data.Exp <= 1_000_000_000_000;
 }
 
 let col;
