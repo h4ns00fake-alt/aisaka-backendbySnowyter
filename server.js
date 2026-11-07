@@ -123,6 +123,8 @@ app.post("/aura/save", checkApiKey, async (req, res) => {
 app.get("/", (req, res) => res.send("Octane.sw24 backend dang chay OK"));
 
 (async () => {
+	   	console.log("Biến có chữ MONGO:", Object.keys(process.env).filter(k => k.toUpperCase().includes("MONGO")));
+   	console.log("MONGO_URI có giá trị?", !!process.env.MONGO_URI);
 	const client = new MongoClient(process.env.MONGO_URI);
 	await client.connect();
 	const db = client.db("octane");
