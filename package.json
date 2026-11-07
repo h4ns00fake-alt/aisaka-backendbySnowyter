@@ -1,12 +1,13 @@
 {
   "name": "octane-backend",
   "version": "1.0.0",
-  "description": "Backend luu tru du lieu player (Token, PIE, Level, Exp) cho Octane Studio",
+  "description": "Backend luu tru du lieu player cho Octane Studio",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0"
   }
 }
