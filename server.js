@@ -11,7 +11,7 @@ const API_KEY = process.env.API_KEY || "";
 console.log("API_KEY có giá trị?", API_KEY.length > 0);
 
 function checkApiKey(req, res, next) {
-	const given = Buffer.from(req.headers["x-api-key"] || "");
+	const given = Buffer.from(req.headers["x-api-key"] || req.query.key || "");
 	const expected = Buffer.from(API_KEY);
 	if (!API_KEY || given.length !== expected.length || !crypto.timingSafeEqual(given, expected)) {
 		return res.status(401).json({ error: "Sai API key" });
